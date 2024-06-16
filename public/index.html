@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livraria</title>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+    <h1>Livraria</h1>
+
+    <div id="livros-section">
+        <h2>Livros</h2>
+        <div id="livros-list"></div>
+        <button onclick="showLivroForm()">Adicionar Livro</button>
+        <div id="livro-form" style="display: none;">
+            <input type="text" id="titulo" placeholder="Título">
+            <input type="number" id="autor_id" placeholder="ID do Autor">
+            <input type="text" id="genero" placeholder="Gênero">
+            <input type="number" id="ano_publicacao" placeholder="Ano de Publicação">
+            <input type="text" id="editora" placeholder="Editora">
+            <input type="number" id="quantidade_estoque" placeholder="Quantidade em Estoque">
+            <button onclick="addLivro()">Salvar</button>
+        </div>
+    </div>
+
+    <div id="autores-section">
+        <h2>Autores</h2>
+        <div id="autores-list"></div>
+        <button onclick="showAutorForm()">Adicionar Autor</button>
+        <div id="autor-form" style="display: none;">
+            <input type="text" id="nome_autor" placeholder="Nome">
+            <textarea id="biografia" placeholder="Biografia"></textarea>
+            <button onclick="addAutor()">Salvar</button>
+        </div>
+    </div>
+
+    <div id="clientes-section">
+        <h2>Clientes</h2>
+        <div id="clientes-list"></div>
+        <button onclick="showClienteForm()">Adicionar Cliente</button>
+        <div id="cliente-form" style="display: none;">
+            <input type="text" id="nome_cliente" placeholder="Nome">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="senha" placeholder="Senha">
+            <button onclick="addCliente()">Salvar</button>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
