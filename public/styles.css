@@ -1,21 +1,40 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #919191;
 }
 
-h1, h2 {
-    color: #333;
+h1 {
+    text-align: center;
 }
 
-#livros-section, #autores-section, #clientes-section {
+#main-buttons {
+    text-align: center;
     margin-bottom: 20px;
 }
 
-button {
+#main-buttons button {
+    margin: 5px;
+}
+
+.section {
+    margin: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
     margin-top: 10px;
 }
 
-input, textarea {
-    display: block;
-    margin-bottom: 10px;
+table, th, td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+
+form input {
+    margin: 5px;
+    padding: 8px;
 }

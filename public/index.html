@@ -9,19 +9,87 @@
 <body>
     <h1>Livraria</h1>
 
-    <div id="botoes">
-        <button onclick="abrirTabela('livros')">Livros</button>
-        <button onclick="abrirTabela('autores')">Autores</button>
-        <button onclick="abrirTabela('clientes')">Clientes</button>
+    <div id="main-buttons">
+        <button onclick="showSection('livros-section')">Livros</button>
+        <button onclick="showSection('autores-section')">Autores</button>
+        <button onclick="showSection('clientes-section')">Clientes</button>
     </div>
 
-    <div id="tabela">
-        <!-- Tabelas serão carregadas dinamicamente aqui -->
+    <!-- Seção de Livros -->
+    <div id="livros-section" class="section" style="display: none;">
+        <h2>Livros</h2>
+        <button onclick="showLivroForm()">Adicionar Livro</button>
+        <table id="livros-table">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Autor</th>
+                    <th>Gênero</th>
+                    <th>Ano de Publicação</th>
+                    <th>Editora</th>
+                    <th>Quantidade em Estoque</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="livros-list"></tbody>
+        </table>
+        <div id="livro-form" style="display: none;">
+            <input type="hidden" id="livro-id">
+            <input type="text" id="titulo" placeholder="Título">
+            <input type="number" id="autor_id" placeholder="ID do Autor">
+            <input type="text" id="genero" placeholder="Gênero">
+            <input type="number" id="ano_publicacao" placeholder="Ano de Publicação">
+            <input type="text" id="editora" placeholder="Editora">
+            <input type="number" id="quantidade_estoque" placeholder="Quantidade em Estoque">
+            <button id="btnSalvarLivro" onclick="salvarLivro()">Salvar</button>
+            <button onclick="cancelarLivro()">Cancelar</button>
+        </div>
     </div>
 
-    <!-- Formulário para adicionar/editar -->
-    <div id="form" style="display: none;">
-        <!-- Formulário será carregado dinamicamente aqui -->
+    <!-- Seção de Autores -->
+    <div id="autores-section" class="section" style="display: none;">
+        <h2>Autores</h2>
+        <button onclick="showAutorForm()">Adicionar Autor</button>
+        <table id="autores-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="autores-list"></tbody>
+        </table>
+        <div id="autor-form" style="display: none;">
+            <input type="hidden" id="autor-id">
+            <input type="text" id="nome-autor" placeholder="Nome do Autor">
+            <button id="btnSalvarAutor" onclick="salvarAutor()">Salvar</button>
+            <button onclick="cancelarAutor()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Seção de Clientes -->
+    <div id="clientes-section" class="section" style="display: none;">
+        <h2>Clientes</h2>
+        <button onclick="showClienteForm()">Adicionar Cliente</button>
+        <table id="clientes-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Telefone</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="clientes-list"></tbody>
+        </table>
+        <div id="cliente-form" style="display: none;">
+            <input type="hidden" id="cliente-id">
+            <input type="text" id="nome-cliente" placeholder="Nome do Cliente">
+            <input type="email" id="email-cliente" placeholder="Email do Cliente">
+            <input type="tel" id="telefone-cliente" placeholder="Telefone do Cliente">
+            <button id="btnSalvarCliente" onclick="salvarCliente()">Salvar</button>
+            <button onclick="cancelarCliente()">Cancelar</button>
+        </div>
     </div>
 
     <!-- Script JavaScript -->

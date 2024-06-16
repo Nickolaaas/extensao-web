@@ -1,201 +1,307 @@
 const API_URL = 'http://localhost:3000';
 
-// Função para abrir a tabela correspondente ao botão clicado
-function abrirTabela(entidade) {
-    ocultarFormulario(); // Esconde qualquer formulário aberto
+// Função para mostrar a seção correspondente
+function showSection(sectionId) {
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => section.style.display = 'none');
+    document.getElementById(sectionId).style.display = 'block';
 
-    switch (entidade) {
-        case 'livros':
-            carregarTabelaLivros();
-            break;
-        case 'autores':
-            carregarTabelaAutores();
-            break;
-        case 'clientes':
-            carregarTabelaClientes();
-            break;
-        default:
-            console.error('Entidade inválida');
+    // Carregar dados quando a seção for exibida
+    if (sectionId === 'livros-section') {
+        carregarLivros();
+    } else if (sectionId === 'autores-section') {
+        carregarAutores();
+    } else if (sectionId === 'clientes-section') {
+        carregarClientes();
     }
 }
 
-// Função para carregar a tabela de Livros
-async function carregarTabelaLivros() {
+// Funções para Livros
+async function carregarLivros() {
     const response = await fetch(`${API_URL}/livros`);
     const livros = await response.json();
 
-    const tabelaHtml = `
-        <h2>Livros</h2>
-        <button onclick="mostrarFormulario('livros')">Adicionar Livro</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>Título</th>
-                    <th>Autor ID</th>
-                    <th>Gênero</th>
-                    <th>Ano de Publicação</th>
-                    <th>Editora</th>
-                    <th>Quantidade em Estoque</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="tabela-corpo">
-                ${livros.map(livro => `
-                    <tr>
-                        <td>${livro.titulo}</td>
-                        <td>${livro.autor_id}</td>
-                        <td>${livro.genero}</td>
-                        <td>${livro.ano_publicacao}</td>
-                        <td>${livro.editora}</td>
-                        <td>${livro.quantidade_estoque}</td>
-                        <td>
-                            <button onclick="editar('livros', ${livro.id})">Editar</button>
-                            <button onclick="excluir('livros', ${livro.id})">Excluir</button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
+    const livrosList = document.getElementById('livros-list');
+    livrosList.innerHTML = '';
 
-    document.getElementById('tabela').innerHTML = tabelaHtml;
+    livros.forEach(livro => {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+            <td>${livro.titulo}</td>
+            <td>${livro.autor_id}</td>
+            <td>${livro.genero}</td>
+            <td>${livro.ano_publicacao}</td>
+            <td>${livro.editora}</td>
+            <td>${livro.quantidade_estoque}</td>
+            <td>
+                <button onclick="editarLivro(${livro.id})">Editar</button>
+                <button onclick="excluirLivro(${livro.id})">Excluir</button>
+            </td>
+        `;
+
+        livrosList.appendChild(tr);
+    });
 }
 
-// Função para carregar a tabela de Autores
-async function carregarTabelaAutores() {
-    const response = await fetch(`${API_URL}/autores`);
-    const autores = await response.json();
-
-    const tabelaHtml = `
-        <h2>Autores</h2>
-        <button onclick="mostrarFormulario('autores')">Adicionar Autor</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nome</th>
-                    <th>Biografia</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="tabela-corpo">
-                ${autores.map(autor => `
-                    <tr>
-                        <td>${autor.id}</td>
-                        <td>${autor.nome}</td>
-                        <td>${autor.biografia}</td>
-                        <td>
-                            <button onclick="editar('autores', ${autor.id})">Editar</button>
-                            <button onclick="excluir('autores', ${autor.id})">Excluir</button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-
-    document.getElementById('tabela').innerHTML = tabelaHtml;
+function showLivroForm() {
+    document.getElementById('livro-form').style.display = 'block';
+    document.getElementById('livro-id').value = '';
 }
 
-// Função para carregar a tabela de Clientes
-async function carregarTabelaClientes() {
-    const response = await fetch(`${API_URL}/clientes`);
-    const clientes = await response.json();
-
-    const tabelaHtml = `
-        <h2>Clientes</h2>
-        <button onclick="mostrarFormulario('clientes')">Adicionar Cliente</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nome</th>
-                    <th>Email</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="tabela-corpo">
-                ${clientes.map(cliente => `
-                    <tr>
-                        <td>${cliente.id}</td>
-                        <td>${cliente.nome}</td>
-                        <td>${cliente.email}</td>
-                        <td>
-                            <button onclick="editar('clientes', ${cliente.id})">Editar</button>
-                            <button onclick="excluir('clientes', ${cliente.id})">Excluir</button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-
-    document.getElementById('tabela').innerHTML = tabelaHtml;
+function cancelarLivro() {
+    document.getElementById('livro-form').style.display = 'none';
 }
 
-// Função para exibir o formulário de adição/editação correspondente à entidade
-function mostrarFormulario(entidade) {
-    ocultarFormulario(); // Esconde qualquer formulário aberto
+async function salvarLivro() {
+    const livroId = document.getElementById('livro-id').value;
+    const titulo = document.getElementById('titulo').value;
+    const autor_id = document.getElementById('autor_id').value;
+    const genero = document.getElementById('genero').value;
+    const ano_publicacao = document.getElementById('ano_publicacao').value;
+    const editora = document.getElementById('editora').value;
+    const quantidade_estoque = document.getElementById('quantidade_estoque').value;
 
-    let formularioHtml;
-
-    switch (entidade) {
-        case 'livros':
-            formularioHtml = `
-                <h2>Adicionar/Editar Livro</h2>
-                <input type="hidden" id="id">
-                <input type="text" id="titulo" placeholder="Título">
-                <input type="number" id="autor_id" placeholder="ID do Autor">
-                <input type="text" id="genero" placeholder="Gênero">
-                <input type="number" id="ano_publicacao" placeholder="Ano de Publicação">
-                <input type="text" id="editora" placeholder="Editora">
-                <input type="number" id="quantidade_estoque" placeholder="Quantidade em Estoque">
-                <button onclick="salvar('livros')">Salvar</button>
-                <button onclick="ocultarFormulario()">Cancelar</button>
-            `;
-            break;
-        case 'autores':
-            formularioHtml = `
-                <h2>Adicionar/Editar Autor</h2>
-                <input type="hidden" id="id">
-                <input type="text" id="nome" placeholder="Nome">
-                <textarea id="biografia" placeholder="Biografia"></textarea>
-                <button onclick="salvar('autores')">Salvar</button>
-                <button onclick="ocultarFormulario()">Cancelar</button>
-            `;
-            break;
-        case 'clientes':
-            formularioHtml = `
-                <h2>Adicionar/Editar Cliente</h2>
-                <input type="hidden" id="id">
-                <input type="text" id="nome" placeholder="Nome">
-                <input type="email" id="email" placeholder="Email">
-                <input type="password" id="senha" placeholder="Senha">
-                <button onclick="salvar('clientes')">Salvar</button>
-                <button onclick="ocultarFormulario()">Cancelar</button>
-            `;
-            break;
-        default:
-            console.error('Entidade inválida');
+    let method, url;
+    if (livroId) {
+        method = 'PUT';
+        url = `${API_URL}/livros/${livroId}`;
+    } else {
+        method = 'POST';
+        url = `${API_URL}/livros`;
     }
-
-    document.getElementById('form').innerHTML = formularioHtml;
-    document.getElementById('form').style.display = 'block';
-}
-
-// Função para esconder o formulário
-function ocultarFormulario() {
-    document.getElementById('form').style.display = 'none';
-}
-
-// Função para salvar/adicionar uma entidade (Livro, Autor, Cliente)
-async function salvar(entidade) {
-    const id = document.getElementById('id').value;
-    const url = id ? `${API_URL}/${entidade}/${id}` : `${API_URL}/${entidade}`;
-    const method = id ? 'PUT' : 'POST';
-
-    const dados = obterDadosFormulario(entidade);
 
     const response = await fetch(url, {
         method: method,
-        headers
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ titulo, autor_id, genero, ano_publicacao, editora, quantidade_estoque })
+    });
+
+    if (response.ok) {
+        alert('Livro salvo com sucesso');
+        cancelarLivro();
+        carregarLivros();
+    } else {
+        alert('Erro ao salvar livro');
+    }
+}
+
+async function editarLivro(id) {
+    const response = await fetch(`${API_URL}/livros/${id}`);
+    const livro = await response.json();
+
+    document.getElementById('livro-id').value = livro.id;
+    document.getElementById('titulo').value = livro.titulo;
+    document.getElementById('autor_id').value = livro.autor_id;
+    document.getElementById('genero').value = livro.genero;
+    document.getElementById('ano_publicacao').value = livro.ano_publicacao;
+    document.getElementById('editora').value = livro.editora;
+    document.getElementById('quantidade_estoque').value = livro.quantidade_estoque;
+
+    showLivroForm();
+}
+
+async function excluirLivro(id) {
+    const confirmacao = confirm('Deseja realmente excluir este livro?');
+    if (confirmacao) {
+        const response = await fetch(`${API_URL}/livros/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('Livro excluído com sucesso');
+            carregarLivros();
+        } else {
+            alert('Erro ao excluir livro');
+        }
+    }
+}
+
+// Funções para Autores
+async function carregarAutores() {
+    const response = await fetch(`${API_URL}/autores`);
+    const autores = await response.json();
+
+    const autoresList = document.getElementById('autores-list');
+    autoresList.innerHTML = '';
+
+    autores.forEach(autor => {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+            <td>${autor.nome}</td>
+            <td>
+                <button onclick="editarAutor(${autor.id})">Editar</button>
+                <button onclick="excluirAutor(${autor.id})">Excluir</button>
+            </td>
+        `;
+
+        autoresList.appendChild(tr);
+    });
+}
+
+function showAutorForm() {
+    document.getElementById('autor-form').style.display = 'block';
+    document.getElementById('autor-id').value = '';
+}
+
+function cancelarAutor() {
+    document.getElementById('autor-form').style.display = 'none';
+}
+
+async function salvarAutor() {
+    const autorId = document.getElementById('autor-id').value;
+    const nome = document.getElementById('nome-autor').value;
+
+    let method, url;
+    if (autorId) {
+        method = 'PUT';
+        url = `${API_URL}/autores/${autorId}`;
+    } else {
+        method = 'POST';
+        url = `${API_URL}/autores`;
+    }
+
+    const response = await fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nome })
+    });
+
+    if (response.ok) {
+        alert('Autor salvo com sucesso');
+        cancelarAutor();
+        carregarAutores();
+    } else {
+        alert('Erro ao salvar autor');
+    }
+}
+
+async function editarAutor(id) {
+    const response = await fetch(`${API_URL}/autores/${id}`);
+    const autor = await response.json();
+
+    document.getElementById('autor-id').value = autor.id;
+    document.getElementById('nome-autor').value = autor.nome;
+
+    showAutorForm();
+}
+
+async function excluirAutor(id) {
+    const confirmacao = confirm('Deseja realmente excluir este autor?');
+    if (confirmacao) {
+        const response = await fetch(`${API_URL}/autores/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('Autor excluído com sucesso');
+            carregarAutores();
+        } else {
+            alert('Erro ao excluir autor');
+        }
+    }
+}
+
+// Funções para Clientes
+async function carregarClientes() {
+    const response = await fetch(`${API_URL}/clientes`);
+    const clientes = await response.json();
+
+    const clientesList = document.getElementById('clientes-list');
+    clientesList.innerHTML = '';
+
+    clientes.forEach(cliente => {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+            <td>${cliente.nome}</td>
+            <td>${cliente.email}</td>
+            <td>${cliente.telefone}</td>
+            <td>
+                <button onclick="editarCliente(${cliente.id})">Editar</button>
+                <button onclick="excluirCliente(${cliente.id})">Excluir</button>
+            </td>
+        `;
+
+        clientesList.appendChild(tr);
+    });
+}
+
+function showClienteForm() {
+    document.getElementById('cliente-form').style.display = 'block';
+    document.getElementById('cliente-id').value = '';
+}
+
+function cancelarCliente() {
+    document.getElementById('cliente-form').style.display = 'none';
+}
+
+async function salvarCliente() {
+    const clienteId = document.getElementById('cliente-id').value;
+    const nome = document.getElementById('nome-cliente').value;
+    const email = document.getElementById('email-cliente').value;
+    const telefone = document.getElementById('telefone-cliente').value;
+
+    let method, url;
+    if (clienteId) {
+        method = 'PUT';
+        url = `${API_URL}/clientes/${clienteId}`;
+    } else {
+        method = 'POST';
+        url = `${API_URL}/clientes`;
+    }
+
+    const response = await fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nome, email, telefone })
+    });
+
+    if (response.ok) {
+        alert('Cliente salvo com sucesso');
+        cancelarCliente();
+        carregarClientes();
+    } else {
+        alert('Erro ao salvar cliente');
+    }
+}
+
+async function editarCliente(id) {
+    const response = await fetch(`${API_URL}/clientes/${id}`);
+    const cliente = await response.json();
+
+    document.getElementById('cliente-id').value = cliente.id;
+    document.getElementById('nome-cliente').value = cliente.nome;
+    document.getElementById('email-cliente').value = cliente.email;
+    document.getElementById('telefone-cliente').value = cliente.telefone;
+
+    showClienteForm();
+}
+
+async function excluirCliente(id) {
+    const confirmacao = confirm('Deseja realmente excluir este cliente?');
+    if (confirmacao) {
+        const response = await fetch(`${API_URL}/clientes/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('Cliente excluído com sucesso');
+            carregarClientes();
+        } else {
+            alert('Erro ao excluir cliente');
+        }
+    }
+}
+
+// Carregar dados ao iniciar
+window.onload = () => {
+    // Inicialmente, nenhuma seção é carregada.
+};
