@@ -53,7 +53,9 @@
         <table id="autores-table">
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Nome</th>
+                    <th>Biografia</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -62,10 +64,14 @@
         <div id="autor-form" style="display: none;">
             <input type="hidden" id="autor-id">
             <input type="text" id="nome-autor" placeholder="Nome do Autor">
+            <input type="text" id="biografia-autor" placeholder="Biografia do Autor">
             <button id="btnSalvarAutor" onclick="salvarAutor()">Salvar</button>
             <button onclick="cancelarAutor()">Cancelar</button>
-        </div>
+        </div>        
     </div>
+
+
+
 
     <!-- Seção de Clientes -->
     <div id="clientes-section" class="section" style="display: none;">

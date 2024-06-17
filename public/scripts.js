@@ -18,30 +18,37 @@ function showSection(sectionId) {
 
 // Funções para Livros
 async function carregarLivros() {
-    const response = await fetch(`${API_URL}/livros`);
-    const livros = await response.json();
+    try {
+        const response = await fetch(`${API_URL}/livros`);
+        if (!response.ok) {
+            throw new Error('Erro ao carregar livros');
+        }
+        const livros = await response.json();
 
-    const livrosList = document.getElementById('livros-list');
-    livrosList.innerHTML = '';
+        const livrosList = document.getElementById('livros-list');
+        livrosList.innerHTML = '';
 
-    livros.forEach(livro => {
-        const tr = document.createElement('tr');
+        livros.forEach(livro => {
+            const tr = document.createElement('tr');
 
-        tr.innerHTML = `
-            <td>${livro.titulo}</td>
-            <td>${livro.autor_id}</td>
-            <td>${livro.genero}</td>
-            <td>${livro.ano_publicacao}</td>
-            <td>${livro.editora}</td>
-            <td>${livro.quantidade_estoque}</td>
-            <td>
-                <button onclick="editarLivro(${livro.id})">Editar</button>
-                <button onclick="excluirLivro(${livro.id})">Excluir</button>
-            </td>
-        `;
+            tr.innerHTML = `
+                <td>${livro.titulo}</td>
+                <td>${livro.autor_id}</td>
+                <td>${livro.genero}</td>
+                <td>${livro.ano_publicacao}</td>
+                <td>${livro.editora}</td>
+                <td>${livro.quantidade_estoque}</td>
+                <td>
+                    <button onclick="editarLivro(${livro.id})">Editar</button>
+                    <button onclick="excluirLivro(${livro.id})">Excluir</button>
+                </td>
+            `;
 
-        livrosList.appendChild(tr);
-    });
+            livrosList.appendChild(tr);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar livros:', error);
+    }
 }
 
 function showLivroForm() {
@@ -51,16 +58,22 @@ function showLivroForm() {
 
 function cancelarLivro() {
     document.getElementById('livro-form').style.display = 'none';
+    document.getElementById('titulo').value = '';
+    document.getElementById('autor_id').value = '';
+    document.getElementById('genero').value = '';
+    document.getElementById('ano_publicacao').value = '';
+    document.getElementById('editora').value = '';
+    document.getElementById('quantidade_estoque').value = '';
 }
 
 async function salvarLivro() {
     const livroId = document.getElementById('livro-id').value;
     const titulo = document.getElementById('titulo').value;
-    const autor_id = document.getElementById('autor_id').value;
+    const autorId = document.getElementById('autor_id').value;
     const genero = document.getElementById('genero').value;
-    const ano_publicacao = document.getElementById('ano_publicacao').value;
+    const anoPublicacao = document.getElementById('ano_publicacao').value;
     const editora = document.getElementById('editora').value;
-    const quantidade_estoque = document.getElementById('quantidade_estoque').value;
+    const quantidadeEstoque = document.getElementById('quantidade_estoque').value;
 
     let method, url;
     if (livroId) {
@@ -71,76 +84,112 @@ async function salvarLivro() {
         url = `${API_URL}/livros`;
     }
 
-    const response = await fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ titulo, autor_id, genero, ano_publicacao, editora, quantidade_estoque })
-    });
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ titulo, autor_id: autorId, genero, ano_publicacao: anoPublicacao, editora, quantidade_estoque: quantidadeEstoque })
+        });
 
-    if (response.ok) {
+        if (!response.ok) {
+            throw new Error('Erro ao salvar livro');
+        }
+
         alert('Livro salvo com sucesso');
         cancelarLivro();
         carregarLivros();
-    } else {
-        alert('Erro ao salvar livro');
+    } catch (error) {
+        console.error('Erro ao salvar livro:', error);
     }
 }
 
+
 async function editarLivro(id) {
-    const response = await fetch(`${API_URL}/livros/${id}`);
-    const livro = await response.json();
+    try {
+        const response = await fetch(`${API_URL}/livros/${id}`);
+        if (!response.ok) {
+            throw new Error(`Erro ao carregar livro com ID ${id}`);
+        }
+        const livro = await response.json();
 
-    document.getElementById('livro-id').value = livro.id;
-    document.getElementById('titulo').value = livro.titulo;
-    document.getElementById('autor_id').value = livro.autor_id;
-    document.getElementById('genero').value = livro.genero;
-    document.getElementById('ano_publicacao').value = livro.ano_publicacao;
-    document.getElementById('editora').value = livro.editora;
-    document.getElementById('quantidade_estoque').value = livro.quantidade_estoque;
+        document.getElementById('livro-id').value = livro.id;
+        document.getElementById('titulo').value = livro.titulo;
+        document.getElementById('autor_id').value = livro.autor_id;
+        document.getElementById('genero').value = livro.genero;
+        document.getElementById('ano_publicacao').value = livro.ano_publicacao;
+        document.getElementById('editora').value = livro.editora;
+        document.getElementById('quantidade_estoque').value = livro.quantidade_estoque;
 
-    showLivroForm();
+        document.getElementById('livro-form').style.display = 'block';
+    } catch (error) {
+        console.error('Erro ao editar livro:', error);
+        alert(`Erro ao editar livro: ${error.message}`);
+    }
 }
 
+
+  
+  
+  
+
+
+
+
 async function excluirLivro(id) {
-    const confirmacao = confirm('Deseja realmente excluir este livro?');
-    if (confirmacao) {
+    try {
         const response = await fetch(`${API_URL}/livros/${id}`, {
             method: 'DELETE'
         });
 
-        if (response.ok) {
-            alert('Livro excluído com sucesso');
-            carregarLivros();
-        } else {
-            alert('Erro ao excluir livro');
+        if (!response.ok) {
+            throw new Error(`Erro ao deletar livro: ${response.statusText}`);
         }
+
+        const result = await response.json();
+        alert(result.message);
+        carregarLivros(); // Atualiza a lista de livros
+    } catch (error) {
+        console.error('Erro ao deletar livro:', error);
+        alert(`Erro ao deletar livro: ${error.message}`);
     }
 }
 
-// Funções para Autores
+
+// Função para carregar e exibir autores na tabela
 async function carregarAutores() {
-    const response = await fetch(`${API_URL}/autores`);
-    const autores = await response.json();
+    try {
+        const response = await fetch(`${API_URL}/autores`);
 
-    const autoresList = document.getElementById('autores-list');
-    autoresList.innerHTML = '';
+        if (!response.ok) {
+            throw new Error('Erro ao carregar autores');
+        }
 
-    autores.forEach(autor => {
-        const tr = document.createElement('tr');
+        const autores = await response.json();
 
-        tr.innerHTML = `
-            <td>${autor.nome}</td>
-            <td>
-                <button onclick="editarAutor(${autor.id})">Editar</button>
-                <button onclick="excluirAutor(${autor.id})">Excluir</button>
-            </td>
-        `;
+        const autoresList = document.getElementById('autores-list');
+        autoresList.innerHTML = '';
 
-        autoresList.appendChild(tr);
-    });
+        autores.forEach(autor => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${autor.id}</td>
+                <td>${autor.nome}</td>
+                <td>${autor.biografia}</td>
+                <td>
+                    <button onclick="editarAutor(${autor.id})">Editar</button>
+                    <button onclick="excluirAutor(${autor.id})">Excluir</button>
+                </td>
+            `;
+            autoresList.appendChild(tr);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar autores:', error);
+    }
 }
+
+
 
 function showAutorForm() {
     document.getElementById('autor-form').style.display = 'block';
@@ -149,11 +198,51 @@ function showAutorForm() {
 
 function cancelarAutor() {
     document.getElementById('autor-form').style.display = 'none';
+    document.getElementById('nome-autor').value = '';
 }
+
+// Função para buscar e exibir autores
+const fetchAutores = async () => {
+    try {
+        const response = await fetch('http://localhost:3000/autores'); // Endpoint para buscar autores
+
+        if (!response.ok) {
+            throw new Error('Erro ao buscar autores');
+        }
+
+        const autores = await response.json();
+
+        // Limpar a tabela de autores
+        const autoresList = document.getElementById('autores-list');
+        autoresList.innerHTML = '';
+
+        // Preencher a tabela com os novos dados
+        autores.forEach((autor) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${autor.id}</td>
+                <td>${autor.nome}</td>
+                <td>${autor.biografia}</td>
+                <td>
+                    <button onclick="editarAutor(${autor.id})">Editar</button>
+                    <button onclick="excluirAutor(${autor.id})">Excluir</button>
+                </td>
+            `;
+            autoresList.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar autores:', error);
+    }
+};
+
+
+
 
 async function salvarAutor() {
     const autorId = document.getElementById('autor-id').value;
     const nome = document.getElementById('nome-autor').value;
+    const biografia = document.getElementById('biografia-autor').value;
 
     let method, url;
     if (autorId) {
@@ -164,73 +253,104 @@ async function salvarAutor() {
         url = `${API_URL}/autores`;
     }
 
-    const response = await fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ nome })
-    });
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nome, biografia })
+        });
 
-    if (response.ok) {
+        if (!response.ok) {
+            throw new Error('Erro ao salvar autor');
+        }
+
         alert('Autor salvo com sucesso');
         cancelarAutor();
         carregarAutores();
-    } else {
-        alert('Erro ao salvar autor');
+    } catch (error) {
+        console.error('Erro ao salvar autor:', error);
     }
 }
 
+
+
 async function editarAutor(id) {
-    const response = await fetch(`${API_URL}/autores/${id}`);
-    const autor = await response.json();
+    try {
+        const response = await fetch(`${API_URL}/autores/${id}`);
+        if (!response.ok) {
+            throw new Error(`Erro ao carregar autor com ID ${id}`);
+        }
+        const autor = await response.json();
 
-    document.getElementById('autor-id').value = autor.id;
-    document.getElementById('nome-autor').value = autor.nome;
+        document.getElementById('autor-id').value = autor.id;
+        document.getElementById('nome-autor').value = autor.nome;
+        document.getElementById('biografia-autor').value = autor.biografia;
 
-    showAutorForm();
+        document.getElementById('autor-form').style.display = 'block';
+    } catch (error) {
+        console.error('Erro ao editar autor:', error);
+        alert(`Erro ao editar autor: ${error.message}`);
+    }
 }
+
+
+
+
 
 async function excluirAutor(id) {
     const confirmacao = confirm('Deseja realmente excluir este autor?');
     if (confirmacao) {
-        const response = await fetch(`${API_URL}/autores/${id}`, {
-            method: 'DELETE'
-        });
+        try {
+            const response = await fetch(`${API_URL}/autores/${id}`, {
+                method: 'DELETE'
+            });
 
-        if (response.ok) {
+            if (!response.ok) {
+                throw new Error('Erro ao excluir autor');
+            }
+
             alert('Autor excluído com sucesso');
             carregarAutores();
-        } else {
-            alert('Erro ao excluir autor');
+        } catch (error) {
+            console.error('Erro ao excluir autor:', error);
         }
     }
 }
 
-// Funções para Clientes
 async function carregarClientes() {
-    const response = await fetch(`${API_URL}/clientes`);
-    const clientes = await response.json();
+    try {
+        const response = await fetch(`${API_URL}/clientes`);
+        if (!response.ok) {
+            throw new Error('Erro ao carregar clientes');
+        }
+        const clientes = await response.json();
 
-    const clientesList = document.getElementById('clientes-list');
-    clientesList.innerHTML = '';
+        const clientesList = document.getElementById('clientes-list');
+        clientesList.innerHTML = '';
 
-    clientes.forEach(cliente => {
-        const tr = document.createElement('tr');
+        clientes.forEach(cliente => {
+            const tr = document.createElement('tr');
 
-        tr.innerHTML = `
-            <td>${cliente.nome}</td>
-            <td>${cliente.email}</td>
-            <td>${cliente.telefone}</td>
-            <td>
-                <button onclick="editarCliente(${cliente.id})">Editar</button>
-                <button onclick="excluirCliente(${cliente.id})">Excluir</button>
-            </td>
-        `;
+            tr.innerHTML = `
+                <td>${cliente.nome}</td>
+                <td>${cliente.email}</td>
+                <td>${cliente.telefone}</td>
+                <td>
+                    <button onclick="editarCliente(${cliente.id})">Editar</button>
+                    <button onclick="excluirCliente(${cliente.id})">Excluir</button>
+                </td>
+            `;
 
-        clientesList.appendChild(tr);
-    });
+            clientesList.appendChild(tr);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar clientes:', error);
+        alert(`Erro ao carregar clientes: ${error.message}`);
+    }
 }
+
 
 function showClienteForm() {
     document.getElementById('cliente-form').style.display = 'block';
@@ -239,6 +359,9 @@ function showClienteForm() {
 
 function cancelarCliente() {
     document.getElementById('cliente-form').style.display = 'none';
+    document.getElementById('nome-cliente').value = '';
+    document.getElementById('email-cliente').value = '';
+    document.getElementById('telefone-cliente').value = '';
 }
 
 async function salvarCliente() {
@@ -256,47 +379,66 @@ async function salvarCliente() {
         url = `${API_URL}/clientes`;
     }
 
-    const response = await fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ nome, email, telefone })
-    });
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nome, email, telefone })
+        });
 
-    if (response.ok) {
+        if (!response.ok) {
+            throw new Error('Erro ao salvar cliente');
+        }
+
         alert('Cliente salvo com sucesso');
         cancelarCliente();
         carregarClientes();
-    } else {
-        alert('Erro ao salvar cliente');
+    } catch (error) {
+        console.error('Erro ao salvar cliente:', error);
     }
 }
 
+
+
 async function editarCliente(id) {
-    const response = await fetch(`${API_URL}/clientes/${id}`);
-    const cliente = await response.json();
+    try {
+        const response = await fetch(`${API_URL}/clientes/${id}`);
+        if (!response.ok) {
+            throw new Error(`Erro ao carregar cliente com ID ${id}`);
+        }
+        const cliente = await response.json();
 
-    document.getElementById('cliente-id').value = cliente.id;
-    document.getElementById('nome-cliente').value = cliente.nome;
-    document.getElementById('email-cliente').value = cliente.email;
-    document.getElementById('telefone-cliente').value = cliente.telefone;
+        document.getElementById('cliente-id').value = cliente.id;
+        document.getElementById('nome-cliente').value = cliente.nome;
+        document.getElementById('email-cliente').value = cliente.email;
+        document.getElementById('telefone-cliente').value = cliente.telefone;
 
-    showClienteForm();
+        document.getElementById('cliente-form').style.display = 'block';
+    } catch (error) {
+        console.error('Erro ao editar cliente:', error);
+        alert(`Erro ao editar cliente: ${error.message}`);
+    }
 }
+
 
 async function excluirCliente(id) {
     const confirmacao = confirm('Deseja realmente excluir este cliente?');
     if (confirmacao) {
-        const response = await fetch(`${API_URL}/clientes/${id}`, {
-            method: 'DELETE'
-        });
+        try {
+            const response = await fetch(`${API_URL}/clientes/${id}`, {
+                method: 'DELETE'
+            });
 
-        if (response.ok) {
+            if (!response.ok) {
+                throw new Error('Erro ao excluir cliente');
+            }
+
             alert('Cliente excluído com sucesso');
             carregarClientes();
-        } else {
-            alert('Erro ao excluir cliente');
+        } catch (error) {
+            console.error('Erro ao excluir cliente:', error);
         }
     }
 }
